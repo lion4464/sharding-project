@@ -1,0 +1,94 @@
+server:
+  port: 8080
+
+spring:
+  shardingsphere:
+    props:
+      sql-show: true
+
+    datasource:
+      names: ds0, ds1, ds2, ds3
+
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: org.postgresql.Driver
+        jdbc-url: jdbc:postgresql://localhost:5432/db1
+        username: postgres
+        password: root
+        connection-test-query: SELECT 1
+        initialization-fail-timeout: -1
+        validation-timeout: 5000
+        minimum-idle: 1
+        maximum-pool-size: 5
+      ds1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: org.postgresql.Driver
+        jdbc-url: jdbc:postgresql://localhost:5432/db2
+        username: postgres
+        password: root
+        connection-test-query: SELECT 1
+        initialization-fail-timeout: -1
+        validation-timeout: 5000
+        minimum-idle: 1
+        maximum-pool-size: 5
+      ds2:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: org.postgresql.Driver
+        jdbc-url: jdbc:postgresql://localhost:5432/db3
+        username: postgres
+        password: root
+        connection-test-query: SELECT 1
+        initialization-fail-timeout: -1
+        validation-timeout: 5000
+        minimum-idle: 1
+        maximum-pool-size: 5
+      ds3:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: org.postgresql.Driver
+        jdbc-url: jdbc:postgresql://localhost:5432/db4
+        username: postgres
+        password: root
+        connection-test-query: SELECT 1
+        initialization-fail-timeout: -1
+        validation-timeout: 5000
+        minimum-idle: 1
+        maximum-pool-size: 5
+
+    rules:
+      sharding:
+        tables:
+          users:
+            actual-data-nodes: ds$->{0..3}.users
+            key-generate-strategy:
+              column: id
+              key-generator-name: snowflake
+
+        default-database-strategy:
+          standard:
+            sharding-column: id
+            sharding-algorithm-name: db-hash
+
+        sharding-algorithms:
+          db-hash:
+            type: HASH_MOD
+            props:
+              sharding-count: 4
+
+        key-generators:
+          snowflake:
+            type: SNOWFLAKE
+            props:
+              worker-id: 1
+              max-vibration-offset: 1
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.jdbc.lob.non_contextual_creation: true
+
+logging:
+  level:
+    org.apache.shardingsphere.driver.jdbc.context.CachedDatabaseMetaData: ERROR
+    org.postgresql.jdbc: ERROR
+    com.zaxxer.hikari.pool: WARN
